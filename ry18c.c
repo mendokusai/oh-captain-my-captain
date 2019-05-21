@@ -33,10 +33,26 @@ struct Array *Create_array(const char **list, int count)
   for (i = 1; i < count; i++) {
     arr->list[i] = atoi(list[i]);
   }
-  if (!arr->list || !arr->list[1]) die("couldn't save list");
 
   return arr;
 }
+
+struct Array *Create_num_array(const int *list, int count)
+{
+  struct Array *arr = malloc(sizeof(struct Array));
+  if (!arr) die("array couldn't be created");
+
+  arr->count = count;
+  if (!arr->count) die("couldn't save count");
+
+  int i = 1;
+  for (i = 1; i < count; i++) {
+    arr->list[i] = list[i];
+  }
+
+  return arr;
+}
+
 
 typedef int(*funct_cb) (int a, int b);
 
@@ -70,6 +86,43 @@ void Map_array(struct Array *arr, int val, funct_cb fn)
   }
 }
 
+int Reduce(struct Array *arr)
+{
+  int accumulator = 0;
+  int i = 1;
+  for (i = 1; i < arr->count; i++) {
+    accumulator = arr->list[i] + accumulator;
+  }
+
+  return accumulator;
+}
+
+// This version just blasts the existing array.
+// I'm not a fan, but maybe I'm just too used to FP
+void Filter_array(struct Array *arr, int value)
+{
+  int i = 1;
+  int new_count = 0;
+  int *temp[arr->count];
+  for (i = 1; i < arr->count; i++) {
+    if (arr->list[i] == value) {
+      printf("\tMatch!\n");
+      new_count++;
+      temp[new_count] = arr->list[i];
+      printf("new count %d\n", new_count);
+    } else {
+      printf("no match\n");
+    }
+  }
+
+  for (i = 1; i < arr->count; i++) {
+    if (arr->list[i] <= new_count) {
+      arr->list[i] = temp[i];
+    }
+  }
+  arr->count = new_count;
+}
+
 void Print_array(struct Array *arr)
 {
   int i = 1;
@@ -87,20 +140,43 @@ int main(int argc, char *argv[])
 
   int count = argc;
 
-  int i = 1;
-  int *array[count];
-
   struct Array *ar1 = Create_array(argv, count);
 
-  printf("hi\n");
-  // prints original arra**y
+  // original
+  printf("original array:\n");
+
   Print_array(ar1);
+
+  int acc0 = Reduce(ar1);
+
+  printf("Reduced Array: %d\n", acc0);
+  printf("---\n");
+
+  Filter_array(ar1, 2);
+  printf("I've filted that down to only 2s\n");
+  Print_array(ar1);
+  printf("---\n");
+
+  // mult4
+  printf("Multiplied by 4:\n");
 
   Map_array(ar1, 4, mult);
+
   Print_array(ar1);
+  printf("---\n");
+
+
+  // Mult -4
+  printf("Multiplied by -4:\n");
 
   Map_array(ar1, -4, mult);
+
   Print_array(ar1);
+
+  int acc1 = Reduce(ar1);
+
+  printf("Reduced Array: %d\n", acc1);
+  printf("---\n");
 
   free(ar1);
 
