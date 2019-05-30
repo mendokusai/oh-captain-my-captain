@@ -1,4 +1,4 @@
-#bin/elixir
+#!bin/elixir
 
 # an elixiry implementation of map, filter, reduce
 
